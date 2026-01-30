@@ -28,56 +28,43 @@ export const getAIResponse = async (
 ) => {
     setAiThinking(true);
 
-    const context = conversationContext
-        .slice(-5)
-        .map((msg) => ({
-            role: msg.sender === "user" ? "user" : "assistant",
-            content: msg.text,
-        }));
-
-    const systemPrompt = `You are SAARTHI AI, a compassionate and empathetic mental health support chatbot designed for the Indian context. Your role is to:
-- Listen actively and validate emotions without judgment
-- Provide emotional support and coping strategies
-- Recognize cultural nuances specific to India
-- Encourage professional help when needed
-- Use warm, supportive language
-- Be concise but meaningful (2-4 sentences typically)
-${userMood ? `- The user is currently feeling ${userMood}. Address this sensitively.` : ""}
-${userName ? `- The user's name is ${userName}. Use it naturally when appropriate.` : ""}
-
-CRITICAL SAFETY RULES:
-- If detecting crisis language (suicide, self-harm), immediately provide crisis resources
-- Never provide medical diagnoses or treatment plans
-- Always encourage professional help for serious concerns
-- Be culturally sensitive to Indian family dynamics and social structures
-
-Respond with genuine empathy and practical support.`;
-
     try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        // Construct a query that includes context
+        let fullQuery = userMessage;
+        const contextParts = [];
+        if (userName) contextParts.push(`User Name: ${userName}`);
+        if (userMood) contextParts.push(`Current Mood: ${userMood}`);
+
+        if (contextParts.length > 0) {
+            fullQuery = `[Context: ${contextParts.join(', ')}] ${userMessage}`;
+        }
+
+        const response = await fetch("http://localhost:8000/query", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                model: "claude-sonnet-4-20250514",
-                max_tokens: 1000,
-                system: systemPrompt,
-                messages: [...context, { role: "user", content: userMessage }],
+                query: fullQuery
             }),
         });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
 
         const data = await response.json();
         setAiThinking(false);
 
-        if (data.content && data.content[0]) {
-            return data.content[0].text;
+        // The backend returns structured data, we want the answer text
+        if (data.answer) {
+            return data.answer;
         }
 
         return "I'm here for you. Could you tell me more about what you're experiencing?";
     } catch (error) {
         console.error("AI Error:", error);
         setAiThinking(false);
-        return "I'm having trouble connecting right now, but I'm still here to listen. How can I support you?";
+        return "I'm having trouble connecting to the server. Please ensure the backend is running.";
     }
 };

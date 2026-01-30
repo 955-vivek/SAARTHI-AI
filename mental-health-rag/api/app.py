@@ -4,8 +4,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from rag.pipeline import MentalHealthRAG
+from senitments import analyze_sentiment
 
 app = FastAPI(title="Mental Health RAG API", version="1.0.0")
 
@@ -29,6 +30,9 @@ class QueryResponse(BaseModel):
     stress_score: int
     is_too_critical: bool
     sources: list
+    risk_level: Optional[str] = "GREEN"
+    sentiment_action: Optional[str] = "full_gen_ai"
+    sentiment_message: Optional[str] = ""
 
 import asyncio
 
@@ -66,8 +70,26 @@ async def query_endpoint(request: QueryRequest):
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     
     try:
+        # 1. Analyze Sentiment
+        sentiment_result = analyze_sentiment(request.query)
+        
+        # 2. Get RAG Response
+        # We pass the query to RAG. Ideally RAG should also know about sentiment, 
+        # but for now we just get the response and overlay our sentiment analysis.
         result = rag_pipeline.query(request.query)
-        return result
+        
+        # 3. Merge Sentiment Data
+        # Ensure the score from sentiments.py is used if RAG didn't provide one or we want to override
+        mapped_result = {
+            "answer": result.get("answer", ""),
+            "stress_score": sentiment_result["emotion_score"], # Use our new scoring
+            "is_too_critical": sentiment_result["risk_level"] == "RED",
+            "sources": result.get("sources", []),
+            "risk_level": sentiment_result["risk_level"],
+            "sentiment_action": sentiment_result["action"],
+            "sentiment_message": sentiment_result["message"]
+        }
+        return mapped_result
     except Exception as e:
         print(f"Error processing query: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")

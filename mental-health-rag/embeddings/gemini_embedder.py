@@ -14,7 +14,7 @@ class GeminiEmbedder:
         print(f"Initialized embedder with model: {self.model}")
     
     def __call__(self, input: List[str]) -> List[List[float]]:
-        """Generate embeddings for a list of texts."""
+        """Generate embeddings for a list of texts (for documents)."""
         embeddings = []
         for idx, text in enumerate(input):
             try:
@@ -32,3 +32,21 @@ class GeminiEmbedder:
                 # Return zero vector on error (768 dims for text-embedding-004)
                 embeddings.append([0.0] * 768)
         return embeddings
+    
+    def embed_query(self, input: str) -> List[float]:
+        """Generate embedding for a single query text (for retrieval)."""
+        try:
+            # Truncate very long texts
+            text_truncated = input[:10000] if len(input) > 10000 else input
+            
+            resp = genai.embed_content(
+                model=self.model,
+                content=text_truncated,
+                task_type="retrieval_query"
+            )
+            return resp["embedding"]
+        except Exception as e:
+            print(f"Query embedding error: {e}")
+            # Return zero vector on error (768 dims for text-embedding-004)
+            return [0.0] * 768
+

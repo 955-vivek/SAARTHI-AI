@@ -99,6 +99,8 @@ export default function EnhancedMentalHealthChat() {
 - Recognize cultural nuances specific to India
 - Encourage professional help when needed
 - Use warm, supportive language
+- For Green Zone users: Can suggest some Breathing exersices and meditation techniques, and prefer chanting of holynames and God's names which is sound meditation
+- For Moderate users: Can suggest some Breathing exersices and meditation techniques, and prefer chanting of holynames and God's names which is sound meditation and for some human support also like tele-manas and other helplines
 - Be concise but meaningful (2-4 sentences typically)
 ${userMood ? `- The user is currently feeling ${userMood}. Address this sensitively.` : ''}
 ${userName ? `- The user's name is ${userName}. Use it naturally when appropriate.` : ''}
@@ -112,27 +114,27 @@ CRITICAL SAFETY RULES:
 Respond with genuine empathy and practical support.`;
 
         try {
-            const response = await fetch("https://api.anthropic.com/v1/messages", {
+            const response = await fetch("http://localhost:8000/query", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    model: "claude-sonnet-4-20250514",
-                    max_tokens: 1000,
-                    system: systemPrompt,
-                    messages: [
-                        ...context,
-                        { role: "user", content: userMessage }
-                    ],
+                    query: userMessage
                 }),
             });
 
             const data = await response.json();
             setAiThinking(false);
 
-            if (data.content && data.content[0]) {
-                return data.content[0].text;
+            if (data.risk_level === "RED" && data.sentiment_message) {
+                // Optionally handle critical/red zone in UI if needed, for now just returning answer
+                // You could set a state here to show the alert message
+                console.log("Critical Sentiment Detected:", data.sentiment_message);
+            }
+
+            if (data.answer) {
+                return data.answer;
             }
 
             return "I'm here for you. Could you tell me more about what you're experiencing?";
