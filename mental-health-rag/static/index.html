@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Support Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .header .subtitle {
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+        
+        /* Crisis Banner */
+        .crisis-banner {
+            background: #f44336;
+            color: white;
+            padding: 15px 30px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .crisis-banner.show { display: flex; }
+        
+        .crisis-banner .icon { font-size: 1.5em; }
+        
+        .crisis-content { flex: 1; }
+        
+        .crisis-content h3 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .helplines {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .helpline-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .helpline-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        /* Chat Container */
+        .chat-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .chat-container::-webkit-scrollbar { width: 8px; }
+        .chat-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .welcome-message .emoji { font-size: 4em; margin-bottom: 20px; }
+        .welcome-message h2 { font-size: 1.5em; margin-bottom: 12px; color: #333; }
+        .welcome-message p { font-size: 1em; line-height: 1.6; max-width: 500px; margin: 0 auto; }
+        
+        .quick-prompts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .quick-prompt {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .quick-prompt:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .quick-prompt .emoji { font-size: 1.5em; margin-bottom: 8px; }
+        .quick-prompt .text { font-size: 0.9em; color: #555; }
+        
+        /* Messages */
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .message.user-message { flex-direction: row-reverse; }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+        
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .bot-message .message-avatar {
+            background: #e8eaf6;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-content p { margin-bottom: 10px; }
+        .message-content p:last-child { margin-bottom: 0; }
+        
+        /* Stress Badge */
+        .stress-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .stress-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .stress-low { background: #c8e6c9; color: #2e7d32; }
+        .stress-medium { background: #fff9c4; color: #f57f17; }
+        .stress-high { background: #ffcdd2; color: #c62828; }
+        
+        .sources {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .sources strong { color: #667eea; }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            gap: 6px;
+        }
+        
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        /* Input Area */
+        .input-area {
+            padding: 25px 30px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { max-height: 100vh; border-radius: 0; }
+            .header { padding: 25px 20px; }
+            .header h1 { font-size: 1.6em; }
+            .chat-container { padding: 20px; }
+            .message-content { max-width: 85%; }
+            .input-area { padding: 20px; }
+            .quick-prompts { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span>🧠</span> Mental Health Support</h1>
+            <p class="subtitle">Your compassionate AI companion for mental wellness guidance</p>
+        </div>
+        
+        <!-- Crisis Banner -->
+        <div class="crisis-banner" id="crisisBanner">
+            <div class="icon">⚠️</div>
+            <div class="crisis-content">
+                <h3>Crisis Support Available 24/7</h3>
+                <p style="margin-bottom: 10px; opacity: 0.95;">If you're in immediate danger, please reach out:</p>
+                <div class="helplines">
+                    <a href="tel:988" class="helpline-btn">📞 988 - Suicide & Crisis Lifeline (US)</a>
+                    <a href="tel:911" class="helpline-btn">🚨 911 - Emergency Services</a>
+                    <a href="https://findahelpline.com" target="_blank" class="helpline-btn">🌍 International Helplines</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-wrapper">
+            <div class="chat-container" id="chatContainer">
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="emoji">💙</div>
+                    <h2>Welcome! How can I support you today?</h2>
+                    <p>I'm here to provide compassionate guidance based on mental health resources. Feel free to share what's on your mind.</p>
+                    
+                    <div class="quick-prompts">
+                        <div class="quick-prompt" onclick="usePrompt('I\'m feeling stressed and overwhelmed')">
+                            <div class="emoji">😰</div>
+                            <div class="text">Feeling stressed</div>
+                        </div>
+                        <div class="quick-prompt" onclick="usePrompt('I\'m having trouble sleeping')">
+                            <div class="emoji">😴</div>
+                            <div class="text">Sleep issues</div>
+                        </div>
+                        <div class="quick-prompt" onclick="usePrompt('I feel anxious about everything')">
+                            <div class="emoji">😟</div>
+                            <div class="text">Anxiety concerns</div>
+                        </div>
+                        <div class="quick-prompt" onclick="usePrompt('How can I improve my mental health?')">
+                            <div class="emoji">🌱</div>
+                            <div class="text">General wellness</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="queryInput" 
+                        placeholder="Share your thoughts or ask a question..."
+                        autocomplete="off"
+                    />
+                    <button onclick="sendQuery()" id="sendBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const queryInput = document.getElementById('queryInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const crisisBanner = document.getElementById('crisisBanner');
+        
+        let messageCount = 0;
+        
+        // API Configuration - automatically detects if running standalone or via API
+        const API_BASE_URL = window.location.port === '8000' 
+            ? '' // Same origin when served by FastAPI
+            : 'http://localhost:8000'; // Standalone HTML mode
+
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuery();
+            }
+        });
+
+        function usePrompt(text) {
+            queryInput.value = text;
+            queryInput.focus();
+            sendQuery();
+        }
+
+        function addMessage(text, isUser = false) {
+            if (messageCount === 0 && welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            messageCount++;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            // Convert newlines to paragraphs
+            const paragraphs = text.split('\n\n').filter(p => p.trim());
+            content.innerHTML = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addBotResponse(data) {
+            if (messageCount === 0 && welcomeMessage) {
+                welcomeMessage.style.display = 'none';
+            }
+            messageCount++;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot-message';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            // Answer
+            const paragraphs = data.answer.split('\n\n').filter(p => p.trim());
+            let html = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            
+            // Stress info
+            const stressClass = data.stress_score <= 3 ? 'stress-low' : 
+                               data.stress_score <= 6 ? 'stress-medium' : 'stress-high';
+            const stressEmoji = data.stress_score <= 3 ? '😌' : 
+                               data.stress_score <= 6 ? '😰' : '😢';
+            
+            html += `<div class="stress-info">
+                <span class="stress-badge ${stressClass}">
+                    ${stressEmoji} Stress Level: ${data.stress_score}/10
+                </span>
+            </div>`;
+            
+            // Sources
+            if (data.sources && data.sources.length > 0) {
+                html += `<div class="sources">
+                    <strong>📚 Sources:</strong> ${data.sources.join(', ')}
+                </div>`;
+            }
+            
+            content.innerHTML = html;
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatContainer.appendChild(messageDiv);
+            
+            // Show crisis banner if critical
+            if (data.is_too_critical) {
+                crisisBanner.classList.add('show');
+                setTimeout(() => {
+                    crisisBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+            
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.id = 'loadingIndicator';
+            loadingDiv.innerHTML = `
+                <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return loadingDiv;
+        }
+
+        async function sendQuery() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            addMessage(query, true);
+            queryInput.value = '';
+            sendBtn.disabled = true;
+            
+            const loadingDiv = showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                loadingDiv.remove();
+
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
+
+                const data = await response.json();
+                addBotResponse(data);
+            } catch (error) {
+                loadingDiv.remove();
+                const errorMsg = error.message.includes('Failed to fetch') 
+                    ? 'Cannot connect to API server. Please make sure the server is running on http://localhost:8000'
+                    : 'I apologize, but I encountered an error. Please try again or contact support if the issue persists.';
+                addMessage(errorMsg, false);
+                console.error('Error:', error);
+            } finally {
+                sendBtn.disabled = false;
+                queryInput.focus();
+            }
+        }
+
+        // Check API health on load
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    console.log('✓ API connection successful');
+                } else {
+                    console.warn('⚠ API health check failed');
+                }
+            } catch (error) {
+                console.error('✗ Cannot connect to API. Make sure server is running: python run_api.py');
+                // Show warning banner
+                const warningDiv = document.createElement('div');
+                warningDiv.style.cssText = 'background: #ff9800; color: white; padding: 10px; text-align: center; font-size: 0.9em;';
+                warningDiv.innerHTML = '⚠️ API Server not detected. Please run: <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">python run_api.py</code>';
+                document.body.insertBefore(warningDiv, document.body.firstChild);
+            }
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            queryInput.focus();
+            checkAPIHealth();
+        });
+    </script>
+</body>
+</html>

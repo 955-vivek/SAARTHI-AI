@@ -1,0 +1,144 @@
+========================================
+MENTAL HEALTH RAG - HOW TO RUN
+========================================
+
+REQUIREMENTS:
+- Python 3.9 or higher
+- Internet connection
+- Gemini API key (get from: https://makersuite.google.com/app/apikey)
+
+========================================
+STEP 1: SETUP ENVIRONMENT
+========================================
+
+Windows:
+--------
+1. Open Command Prompt in project folder
+2. Run: python -m venv venv
+3. Run: venv\Scripts\activate
+4. Run: pip install -r requirements.txt
+
+macOS/Linux:
+------------
+1. Open Terminal in project folder
+2. Run: python3 -m venv venv
+3. Run: source venv/bin/activate
+4. Run: pip install -r requirements.txt
+
+========================================
+STEP 2: SET API KEY
+========================================
+
+Windows (CMD):
+--------------
+set GEMINI_API_KEY=your_actual_api_key_here
+
+Windows (PowerShell):
+---------------------
+$env:GEMINI_API_KEY="your_actual_api_key_here"
+
+macOS/Linux:
+------------
+export GEMINI_API_KEY="your_actual_api_key_here"
+
+========================================
+STEP 3: ADD PDF FILES
+========================================
+
+1. Place your mental health PDF documents in the "data" folder
+2. Supported formats: .pdf only
+3. Examples: stress_management.pdf, anxiety_guide.pdf, etc.
+
+========================================
+STEP 4: RUN THE APPLICATION
+========================================
+
+⚠️ IMPORTANT: Always run using Python, NOT by opening HTML directly!
+
+Option A - Web Interface (RECOMMENDED):
+----------------------------------------
+1. Run: python run_api.py
+2. Wait for "Application startup complete" message
+3. Open browser and go to: http://localhost:8000
+4. Start chatting!
+
+❌ DO NOT open static/index.html directly in browser!
+✅ ALWAYS access via http://localhost:8000 after starting server
+
+Option B - Command Line:
+------------------------
+1. Run: python main.py
+2. Type your questions when prompted
+3. Type 'quit' to exit
+
+========================================
+COMMON ERRORS & SOLUTIONS
+========================================
+
+Error: "405 Method Not Allowed" or "Cannot connect to API"
+Solution: 
+- You opened index.html directly instead of running the server
+- Close the HTML file
+- Run: python run_api.py
+- Open: http://localhost:8000 in browser
+
+Error: "GEMINI_API_KEY is required"
+Solution: Make sure you set the environment variable correctly
+
+Error: No PDFs loaded
+Solution: Check that PDF files are in the data/ folder
+
+Error: Port 8000 in use
+Solution: 
+- Find what's using port 8000: netstat -ano | findstr :8000
+- Kill that process or use different port in run_api.py
+
+========================================
+CORRECT WORKFLOW
+========================================
+
+1. Open terminal/command prompt
+2. Navigate to project folder
+3. Activate virtual environment:
+   - Windows: venv\Scripts\activate
+   - Mac/Linux: source venv/bin/activate
+4. Set API key (if not already set)
+5. Run: python run_api.py
+6. Open browser to: http://localhost:8000
+7. Use the chat interface
+
+========================================
+ACCESSING FROM OTHER DEVICES
+========================================
+
+1. Make sure server is running with host="0.0.0.0"
+2. Find your computer's IP:
+   - Windows: ipconfig (look for IPv4)
+   - Mac/Linux: ifconfig or ip addr
+3. On other device, go to: http://YOUR_IP:8000
+
+Example: http://192.168.1.100:8000
+
+========================================
+STOPPING THE APPLICATION
+========================================
+
+In the terminal where server is running:
+- Press Ctrl+C
+- Wait for "Application shutdown complete"
+
+========================================
+TROUBLESHOOTING CHECKLIST
+========================================8
+
+□ Virtual environment activated?
+□ All dependencies installed? (pip install -r requirements.txt)
+□ GEMINI_API_KEY set correctly?
+□ PDFs in data/ folder?
+□ Server running? (python run_api.py)
+□ Accessing http://localhost:8000 (not opening HTML file)?
+□ Port 8000 available?
+
+========================================
+END OF INSTRUCTIONS
+========================================
